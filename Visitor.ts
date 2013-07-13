@@ -74,7 +74,7 @@ class Visitor {
 		if (/^[^a-zA-Z]/.test(key)) return -1
 		
 		if (!this.__cachedOrderFns) {
-			this.__cachedOrder = [
+			this.__cachedOrderFns = [
 				_.isBoolean, _.isNumber, _.isDate, _.isString,
 				_.isObject, _.isArray, _.isFunction
 			]

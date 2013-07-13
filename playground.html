@@ -1,14 +1,19 @@
 <!doctype html>
 <html>
 <head>
+<meta charset='utf-8'/>
 </head>
 <body>
+<script src='vendor.misc.jquery.js'></script>
 <script src='vendor.misc.underscore.js'></script>
-<script type='text/typescript' src='tree.Visitor.ts></script>
+<script type='text/typescript' src='tree.Visitor.ts'></script>
 <script src='vendor.typescript.js'></script>
-<script src='vendor.typescript.autocompile.js'></script>
+<script src='typescript.autocompile.js'></script>
 
 <script>
+needTypescript('tree.Visitor.ts', function() {
+    alert('hi');
+})
 </script>
 </body>
 </html>

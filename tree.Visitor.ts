@@ -57,7 +57,7 @@ class Visitor {
 	}
 	
 	getComparatorForObjectKeys(object) {
-		return => (a,b) {
+		return (a,b) => {
 			var aOrder = this.getOrderForObjectKey(object, a),
 				bOrder = this.getOrderForObjectKey(object, b)
 				

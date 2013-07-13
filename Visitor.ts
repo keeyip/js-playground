@@ -63,14 +63,14 @@ class Visitor {
 				
 			if (aOrder > bOrder) return 1
 			if (aOrder < bOrder) return -1
+			
+			if (a > b) return 1
+			if (a < b) return -1
 			return 0
 		}
 	}
 	
 	getOrderForObjectKey(object, key) {
-		if (key === 'constructor') return -4
-		if (key === 'prototype') return -3
-		if (key === '__proto') return -2
 		if (/^[^a-zA-Z]/.test(key)) return -1
 		
 		if (!this.__cachedOrderFns) {
@@ -81,6 +81,11 @@ class Visitor {
 		}
 		
 		var orderFns = this.__cachedOrderFns
+		
+		if (key === 'constructor') return orderFns.length + 2
+		if (key === 'prototype') return orderFns.length + 1
+		if (key === '__proto') return orderFns.length
+		
 		for (var i = 0, n = orderFns.length; i < n; i++) {
 			if (orderFns[i].call(_, object[key]))
 				return i

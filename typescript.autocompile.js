@@ -30,6 +30,10 @@ Reference: https://github.com/niutech/typescript-compile
             compiler.emit(false, function createFile(fileName) {
                 return outfile;
             });
+            console.group();
+            console.warn(tsCode)
+            console.log(outfile.source);
+            console.groupEnd();
             $('<script>').text(outfile.source).appendTo('body');
             deferred.resolve();
         });

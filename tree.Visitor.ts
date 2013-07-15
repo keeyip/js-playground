@@ -16,7 +16,7 @@ class Visitor {
 		if (!key)
 			this.path = []
 		
-		var enterResult = enter(node, key)
+		var enterResult = enter.call(this, node, key)
 		if (enterResult !== Visitor.DO_NOT_DESCEND) {
 			if (this.canDescend(node, key)) {
 				var childKeys = this.getKeys(node),
@@ -34,7 +34,7 @@ class Visitor {
 			}
 		}
 		
-		leave(node, key)
+		leave.call(this, node, key)
 		return enterResult
 	}
 	
@@ -57,9 +57,10 @@ class Visitor {
 	}
 	
 	getComparatorForObjectKeys(object) {
-		return (a,b) => {
-			var aOrder = this.getOrderForObjectKey(object, a),
-				bOrder = this.getOrderForObjectKey(object, b)
+        var self = this
+		return function (a,b) {
+			var aOrder = self.getOrderForObjectKey(object, a),
+				bOrder = self.getOrderForObjectKey(object, b)
 				
 			if (aOrder > bOrder) return 1
 			if (aOrder < bOrder) return -1

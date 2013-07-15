@@ -1,0 +1,32 @@
+.node {
+    font-family: monospace;
+    margin-bottom: 8px;
+}
+.node-key {
+    display:inline-block;
+    vertical-align:top;
+    width: 40px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    margin-right: 8px;
+}
+.node:not(.root) > .node-key:after {
+    content:':';
+}
+.node-value {
+    display:inline-block;
+    vertical-align:top;
+}
+.node:not(.root) > .node {
+    margin-left: 40px;
+}
+
+.node-type-string {
+    color: orange;
+}
+.node-type-boolean {
+    color: blue;
+}
+.node-type-number {
+    color: green;
+}

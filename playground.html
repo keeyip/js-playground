@@ -29,7 +29,10 @@ needTypescript('tree.Visitor.ts', function() {
         function enter(node, key) {
             var $node = $('<div class="node">')
                 .addClass('node-type-' + (typeof node))
-                .append($('<div class="node-key">').text(key))
+                .append($('<div class="node-key">')
+                    .text(key)
+                    .attr('title', key + ' : ' + (typeof node))
+                )
 
             if (!this.canDescend(node, key)) {
                 $node.append($('<div class="node-value">').text(node))

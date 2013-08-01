@@ -9,49 +9,68 @@
 <script src='vendor.misc.underscore.js'></script>
 <script src='vendor.date.moment.js'></script>
 <script src='vendor.oop.backbone.js'></script>
-<script type='text/typescript' src='tree.Visitor.ts'></script>
-<script src='vendor.typescript.js'></script>
-<script src='typescript.autocompile.js'></script>
+<script src='__compiled.js'></script>
+<!--<script type='text/typescript' src='tree.Visitor.ts'></script>-->
+<!--<script src='vendor.typescript.js'></script>-->
+<!--<script src='typescript.autocompile.js'></script>-->
 
 <script>
-needTypescript('tree.Visitor.ts', function() {
+$(function() {
+    function showTree(tree) {
+        var v = new Visitor()
+
+        var $root,
+            parents = []
+        v.visit(tree,
+            function enter(node, key) {
+                var $node = $('<div class="node">')
+                    .addClass('node-type-' + (_.isArray(node) ? 'array' : (typeof node)))
+                    .append($('<div class="node-key">')
+                        .text(key)
+                        .attr('title', key + ' : ' + (typeof node))
+                    )
+
+                if (!this.canDescend(node, key)) {
+                    $node.append($('<div class="node-value">').text(node))
+                }
+
+                if (parents.length > 0) {
+                    $node.appendTo(_.last(parents))
+                    $node.after('<div class="separator">')
+                } else {
+                    $node.addClass('root')
+                    $root = $node
+                }
+                parents.push($node)
+            },
+            function leave(node, key) {
+                parents.pop()
+            }
+        )
+
+        $root.appendTo('body')
+    }
+
     var u1 = new Backbone.Model({
         id: 'user:1',
         dateSignup: moment('3 days ago')
     });
-
-
-    var v = new Visitor()
-
-    var $root,
-        parents = []
-    v.visit(u1.attributes,
-        function enter(node, key) {
-            var $node = $('<div class="node">')
-                .addClass('node-type-' + (typeof node))
-                .append($('<div class="node-key">')
-                    .text(key)
-                    .attr('title', key + ' : ' + (typeof node))
-                )
-
-            if (!this.canDescend(node, key)) {
-                $node.append($('<div class="node-value">').text(node))
-            }
-
-            if (parents.length > 0) {
-                $node.appendTo(_.last(parents))
-            } else {
-                $node.addClass('root')
-                $root = $node
-            }
-            parents.push($node)
+    var m1 = new Backbone.Model({
+        id: 'method:1',
+        name: 'render',
+        formalParameters: [
+            {name:'debug', type:'boolean', defaultValue:undefined}
+        ],
+        returns: {
+            name: '$el',
+            type: 'JQueryElement'
         },
-        function leave(node, key) {
-            parents.pop()
-        }
-    )
+        isStatic: false,
+        objectType: 'Backbone.View'
+    });
 
-    $root.appendTo('body')
+    showTree(u1.attributes);
+    showTree(m1.attributes);
 })
 </script>
 </body>

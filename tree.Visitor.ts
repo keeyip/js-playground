@@ -1,8 +1,9 @@
+///<reference path="ts-definitions/DefinitelyTyped/underscore/underscore.d.ts"/>
 class Visitor {
-	private path;
+	private path : Array;
 	
-	static DO_NOT_DESCEND = 1;
-	static SKIP_NEXT_SIBLINGS = 2;
+	static DO_NOT_DESCEND = {};
+	static SKIP_NEXT_SIBLINGS = {};
 	
 	constructor() {
 		this.path = []
@@ -50,7 +51,7 @@ class Visitor {
 			keys = _.keys(node)
 			keys.sort(this.getComparatorForObjectKeys(node))
 		} else {
-			throw 'Visitor#getKeys(node), node must be an array or an object'
+			throw 'Visitor#getKeys(<em>node</em>), <em>node</em> must be an array or an object'
 		}
 		
 		return keys
@@ -70,10 +71,14 @@ class Visitor {
 			return 0
 		}
 	}
-	
-	getOrderForObjectKey(object, key) {
-		if (/^[^a-zA-Z]/.test(key)) return -1
-		
+
+    // NOTE: __cachedOrderFns is an implementation detail of #getOrderForObjectKey
+    // This is a class-level member only so that the compiler can
+    // warn about any usage of this member outside of this class
+    private __cachedOrderFns : Array;
+
+    // @return order [-orderFns.length, (orderFns.length + 2) or Infinity]
+	getOrderForObjectKey(object, key) : Number {
 		if (!this.__cachedOrderFns) {
 			this.__cachedOrderFns = [
 				_.isBoolean, _.isNumber, _.isDate, _.isString,
@@ -84,12 +89,18 @@ class Visitor {
 		var orderFns = this.__cachedOrderFns
 		
 		if (key === 'constructor') return orderFns.length + 2
-		if (key === 'prototype') return orderFns.length + 1
-		if (key === '__proto') return orderFns.length
+		if (key === 'prototype')   return orderFns.length + 1
+		if (key === '__proto')     return orderFns.length
+
+        var offset = 0;
+
+        if (/^[^a-zA-Z]/.test(key)) {
+            offset = -orderFns.length;
+        }
 		
 		for (var i = 0, n = orderFns.length; i < n; i++) {
 			if (orderFns[i].call(_, object[key]))
-				return i
+				return offset + i
 		}
 		
 		return Infinity

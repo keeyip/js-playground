@@ -1,0 +1,182 @@
+<!doctype html>
+<html>
+<head>
+<style>
+.note {
+    min-width: 200px;
+    min-height: 200px;
+    background: orange;
+    color: black;
+}
+.contenteditable {
+    margin: 8px 12px;
+    width: 400px;
+    background: white;
+    color: black;
+}
+* {
+    box-sizing: border-box;
+}
+body {
+    background: hsl(0,0%,90%);
+}
+.matrix {
+    border-collapse: collapse;
+    border-spacing:0;
+    margin: 40px;
+}
+.matrix td {
+    background: white;
+    border: solid 1px hsl(0,0%,70%);
+    padding:0;
+    max-width: 100px;
+}
+.matrix td.has-cursor {
+    background: orange;
+}
+.cell-content {
+    border-radius: 12px;
+    margin:4px;
+    background: white;
+    height:100%;
+    min-width:40px;
+    min-height:40px;
+}
+</style>
+</head>
+<body>
+
+<script src='vendor.misc.jquery.js'></script>
+<script>
+;(function() {
+    function newMatrix(totalRows, totalCols) {
+        var $table = $('<table>')
+                .addClass('matrix')
+                .attr('data-total-rows', totalRows)
+                .attr('data-total-cols', totalCols),
+            $tr
+        for (var row=0; row < totalRows; row++) {
+            $tr = $('<tr>')
+            for (var col=0; col < totalCols; col++) {
+                $('<td><div class="cell-content">')
+                    .attr('data-col', col)
+                    .attr('data-row', row)
+                    .appendTo($tr)
+            }
+            $tr.appendTo($table)
+        }
+        $table.appendTo('body')
+        return $table
+    }
+
+    newMatrix(10,1)
+    newMatrix(1,12)
+    newMatrix(2,2)
+    newMatrix(3,3)
+    newMatrix(4,4)
+    newMatrix(4,7)
+
+    var handleClick = function(firstClick) {
+        var $matrix = $(firstClick.currentTarget).closest('table.matrix')
+        var off = function() {
+            $('body').off('keydown', handleKey);
+            $('body').one('click', 'table.matrix', handleClick);
+            $('body').off('mouseup', mouse)
+        }
+        var KEYS = {
+            38: {
+                row: -1
+            },
+            40: {
+                row: 1
+            },
+            37: {
+                col: -1
+            },
+            39: {
+                col: 1
+            },
+            27: function() {
+                $matrix.find('td.has-cursor').removeClass('has-cursor')
+                off()
+            },
+            13: function($cell) {
+                $('body').trigger('matrix.activate-cell', {
+                    $matrix: $matrix,
+                    $cell: $cell,
+                    off: off
+                });
+            }
+        };
+        var handleKey = function(event) {
+            console.group(event.which)
+            if (KEYS.hasOwnProperty(event.which)) {
+                var $current = $matrix.find('td.has-cursor')
+                if ($.isFunction(KEYS[event.which])) {
+                    KEYS[event.which]($current)
+                } else {
+                    var totalRows = parseInt($matrix.attr('data-total-rows'), 10)
+                    var totalCols = parseInt($matrix.attr('data-total-cols'), 10)
+                    var currentRow = parseInt($current.attr('data-row'), 10)
+                    var currentCol = parseInt($current.attr('data-col'), 10)
+                    $current.removeClass('has-cursor')
+                    var newRow = Math.max(0,Math.min(totalRows-1,currentRow + (KEYS[event.which].row || 0)))
+                    var newCol = Math.max(0,Math.min(totalCols-1,currentCol + (KEYS[event.which].col || 0)))
+                    $matrix.find('td[data-row="'+newRow+'"][data-col="'+newCol+'"]').addClass('has-cursor');
+                    event.preventDefault()
+                }
+                console.log('handled')
+            } else {
+                console.log('continue')
+            }
+            console.groupEnd()
+        }
+        $('body').on('keydown', handleKey)
+        var mouse = function(clickOut) {
+            var $target = $(clickOut.target)
+            if ($target.is($matrix) || $.contains($matrix[0],$target[0])) return;
+            off();
+        };
+        $('body').on('mouseup', mouse)
+    }
+    $('body').one('click', 'table.matrix', handleClick);
+    $('body').on('click', 'table.matrix td', function(event) {
+        var $matrix = $(event.currentTarget).closest('table.matrix')
+        $matrix.find('.has-cursor').removeClass('has-cursor')
+        $(event.currentTarget).addClass('has-cursor')
+    });
+    $('body').on('matrix.activate-cell', function(event, data) {
+        var pos = data.$cell.offset()
+        var $note = $('<div class="note">')
+            .css({
+                position:'absolute',
+                top: pos.top,
+                left: pos.left + data.$cell.outerWidth()
+            })
+            .append($('<h4>').html('What do you want to say?'))
+            .append($('<input class="contenteditable">')
+                .val(data.$cell.find('.cell-content').text())
+            )
+            .appendTo('body')
+
+        data.off()
+        $note.find('.contenteditable').focus()
+        
+        var clickOut = function(click) {
+            var $target = $(click.target);
+            if (!$.contains($note[0],$target[0])) {
+                data.$cell.find('.cell-content').text($note.find('.contenteditable').val())
+                $note.remove()
+                $('body').off('click', clickOut)
+            }
+        }
+        $('body').on('click', clickOut)
+
+        console.group('activate-cell')
+        console.warn(event, data)
+        console.groupEnd()
+    });
+})();
+</script>
+</body>
+</html>

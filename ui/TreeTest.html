@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+<style>
+ui-tree {
+	display:block;
+	background:white;
+}
+ui-tree-root {
+	display:block;
+	background:white;
+}
+ui-tree-node {
+	display:block;
+	background:white;
+}
+
+ui-tree-children {
+	display: block;
+	margin-left: 20px;
+}
+</style>
+<style>
+.node-icon {
+	display:inline-block;
+	vertical-align:middle;
+	outline: solid 1px black;
+	width:16px;
+	height:16px;
+	margin-right: 4px;
+}
+.node-icon.node-type-constructor {
+	background: orange;
+	border-radius: 200px;
+	outline:0;
+}
+.node-icon.node-type-object {
+	background: hsl(200,50%,50%);
+	border-radius: 2px;
+	outline:0;
+}
+.node-icon.node-type-folder {
+	display:none;
+}
+.node-label.node-type-folder {
+	font-weight: bold;
+	font-size: 12px;
+}
+.node-label {
+	font-family: menlo;
+	font-size: 10px;
+}
+</style>
+</head>
+<body>
+<script src='jquery.js'></script>
+<script src='lodash.js'></script>
+<script src='jquery.blink.js'></script>
+<script src='BasicTree.js'></script>
+<script src='CollapseTreeMixin.js'></script>
+<script src='BlinkTreeMixin.js'></script>
+<script>
+var dojoTree1 = new BasicTree({
+	decorateNode$: function(node, $node) {
+		return $node.append(
+			$('<span class="node-icon">')
+				.addClass('node-type-' + node.type),
+			$('<span class="node-label">').text(node.label)
+				.addClass('node-type-' + node.type)
+		)
+	},
+
+	rootNode: {label:'dijit', type:'folder', children: [
+		{label:'_AttachMixin', type:'constructor'},
+		{label:'_base', type:'object'},
+		{label:'_base', type:'folder', children: [
+			{label:'focus', type:'object'},
+			{label:'manager', type:'object'},
+		]},
+	]}
+})
+var dojoTree2 = new BasicTree({
+    decorateNode$: function(node, $node) {
+        return $node.append(
+            $('<span class="node-icon">')
+                .addClass('node-type-' + node.type),
+            $('<span class="node-label">').text(node.label)
+                .addClass('node-type-' + node.type)
+        )
+    },
+
+    rootNode: {label:'dijit', type:'folder', children: [
+        {label:'_AttachMixin', type:'constructor'},
+        {label:'_base', type:'object'},
+        {label:'_base', type:'folder', children: [
+            {label:'focus', type:'object'},
+            {label:'manager', type:'object'},
+        ]},
+    ]}
+}).mixin(CollapseTreeMixin, BlinkTreeMixin)
+
+dojoTree1.render$().appendTo('body')
+dojoTree2.render$().appendTo('body')
+
+$('<button>')
+    .on('click', function() {
+        dojoTree2.blinkNode('dijit._base.')
+    })
+    .appendTo('body')
+</script>
+</body>
+</html>
